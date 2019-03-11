@@ -3,13 +3,15 @@ using UnityEngine.EventSystems;
 
 using System.Collections;
 using Photon.Pun;
+using System;
+using Photon.Realtime;
 
 namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 {
     /// <summary>
     /// Manages Player information
     /// </summary>
-    public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable, ITarget
+    public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable, ITarget, IPunInstantiateMagicCallback
     {
         
         #region Public Fields
@@ -21,9 +23,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 
         #endregion
 
-        #region Private Fields
-
-        private const bool DEBUG = true;
+        #region Private Serializable Fields
 
         [Tooltip("Gun owned by player")]
         [SerializeField] private Gun activeGun;
@@ -34,15 +34,39 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         [Tooltip("The Player's UI GameObject Prefab")]
         [SerializeField] private bool usingPlayerUIPrefab = false;
 
+        #endregion Private Serializable Fields
+
+        #region Private Fields
+
+        private const bool DEBUG = true; // indicates whether we are debugging this class
+
+        private PlayerProperties playerProperties; // represents our custom class for keeping track of player properties
+        //private int kills = 0;
+        //private int deaths = 0;
+
+        #endregion
+
+        #region Properties
+
+        public ExitGames.Client.Photon.Hashtable PlayerInfo{
+            get { return playerProperties.Properties; }
+            private set { playerProperties.Properties = value; }
+        }
+
+        public int PhotonPlayerID { get; private set; }
+
         #endregion
 
         #region MonoBehaviour CallBacks
-        
+
         /// <summary>
         /// MonoBehaviour method called on GameObject by Unity during early initialization phase.
         /// </summary>
         void Awake()
         {
+            // PlayerProperties is a class we created to help us set custom properties for photon players 
+            playerProperties = gameObject.GetComponent<PlayerProperties>();
+
             // #Important
             // used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
             if (photonView.IsMine)
@@ -62,7 +86,6 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         /// </summary>
         void Start()
         {
-
             /** Notes from tutorial:
              *   All of this is standard Unity coding. However notice that we are sending a message to the instance we've just created. We 
              *   require a receiver, which means we will be alerted if the SetTarget did not find a component to respond to it. Another 
@@ -222,13 +245,53 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 
         #region Public Methods
 
+        public void SetTeam(string team)
+        {
+            // Update what team this player is on in PlayerProperties
+            PlayerInfo.Remove(PlayerProperties.KEY_TEAM);
+            PlayerInfo.Add(PlayerProperties.KEY_TEAM, team);
+            PhotonNetwork.LocalPlayer.SetCustomProperties(PlayerInfo);
+        }
+        
+        /// <summary>
+        /// Decrease health of player by damage amount. 
+        /// </summary>
+        /// <param name="amount">The amount of damage caused</param>
         public void TakeDamage(float amount)
         {
             Health -= amount;
             if (Health <= 0)
             {
+                // Make player die
                 Die();
             }
+        }
+
+        /// <summary>
+        /// Decrease health of player by damage amount.
+        /// </summary>
+        /// <param name="amount">The amount of damage caused</param>
+        /// <param name="playerWhoCausedDamage">The player who caused the damage</param>
+        public void TakeDamage(float amount, PlayerManager playerWhoCausedDamage)
+        {
+            Health -= amount;
+            if (Health <= 0)
+            {
+                // Make this player die
+                Die();
+
+                // Notify player who caused damage that this player was killed
+                // *Surprisingly, I was able to make the AddKill method private and still access it this way.
+                //  I assume this was because the call is coming from within this class even though we're 
+                //  calling it on a different instance of this class. Just thought it was worth mentioning :)
+                playerWhoCausedDamage.AddKill();
+            }
+        }
+        
+        // Remove this method when done testing the Die() method
+        public void TestDie()
+        {
+            Die();
         }
 
         #endregion Public Methods
@@ -309,13 +372,81 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         }
 
         /// <summary>
-        /// Handles what happens to a player when it dies
+        /// Handles what happens to this player when it dies.
+        /// Right now, we register that this player has died and "respawn" the player
         /// </summary>
         void Die()
         {
-            GameManager.Instance.LeaveRoom();
+            //GameManager.Instance.LeaveRoom();
             //PhotonNetwork.Destroy(gameObject);
             //Destroy(gameObject);
+
+            // Register a death for this player on all client
+            AddDeath();
+            
+            // Respawn
+            Respawn();
+        }
+
+        /// <summary>
+        /// Adds a death for this player. This death is registered on all clients. This method is called by Die()
+        /// </summary>
+        void AddDeath()
+        {
+            // ***
+            //
+            // Look carefully at this code and how it is called during possible gameplay scenarios!
+            // This code is executed on every client (not just master client). 
+            // There may be a hidden synchronization problems (edge cases) yet to be uncovered
+            // 
+            // ***
+
+            // Get current deaths for this player
+            photonView.Owner.CustomProperties.TryGetValue(PlayerProperties.KEY_DEATHS, out object value);
+            int deaths = (value == null) ? 0 : Convert.ToInt32(value);
+
+            // Add a death for this player
+            deaths++;
+            ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
+            properties.Add(PlayerProperties.KEY_DEATHS, deaths);
+            photonView.Owner.SetCustomProperties(properties);
+
+            if (DEBUG) Debug.LogFormat("PlayerManager: Die() deaths = {0}, photonView.Owner.NickName = {1}", deaths, photonView.Owner.NickName);
+        }
+
+        /// <summary>
+        /// Adds a kill for this player. This kill is registered on all clients. This method is called by TakeDamage(float,PlayerManager) when player dies
+        /// </summary>
+        void AddKill()
+        {
+            // ***
+            //
+            // Look carefully at this code and how it is called during possible gameplay scenarios!
+            // This code is executed on every client (not just master client). 
+            // There may be a hidden synchronization problems (edge cases) yet to be uncovered
+            // 
+            // ***
+
+            // Get current deaths for this player
+            photonView.Owner.CustomProperties.TryGetValue(PlayerProperties.KEY_KILLS, out object value);
+            int kills = (value == null) ? 0 : Convert.ToInt32(value);
+
+            // Add a kill for this player
+            kills++;
+            ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
+            properties.Add(PlayerProperties.KEY_KILLS, kills);
+            photonView.Owner.SetCustomProperties(properties);
+
+            if (DEBUG) Debug.LogFormat("PlayerManager: AddKill() kills = {0}, photonView.Owner.NickName = {1}", kills, photonView.Owner.NickName);
+        }
+
+        /// <summary>
+        /// Right now, we just reset the health to 100% and act like nothing happened.
+        /// Later, we'll figure out something better to do...
+        /// </summary>
+        void Respawn()
+        {
+            Health = 100;
         }
 
         /// <summary>
@@ -420,5 +551,19 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         }
 
         #endregion IPunObservable implementation
+
+        #region IPunInstantiateMagicCallback implementation
+
+        /// <summary>
+        /// Photon Callback method. Called after player has been instantiated on network. Used to set up player properties.
+        /// </summary>
+        /// <param name="info"></param>
+        public void OnPhotonInstantiate(PhotonMessageInfo info)
+        {
+            // Share/Sync information about our Photon Player on the network
+            PhotonNetwork.LocalPlayer.SetCustomProperties(PlayerInfo);
+        }
+
+        #endregion IPunInstantiateMagicCallback implementation
     }
 }
