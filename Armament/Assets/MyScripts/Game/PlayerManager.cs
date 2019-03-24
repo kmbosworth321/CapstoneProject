@@ -55,7 +55,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         [SerializeField] int howFarToTossWeapon = 10;
         [Tooltip("The Player's UI GameObject Prefab")]
         [SerializeField] private bool usingPlayerUIPrefab = false; // needed to disable tutorial code... probably should removed with playerUiPrefab
-
+        
         #endregion Private Serializable Fields
 
         #region Private Fields
@@ -135,6 +135,9 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                 GetComponentInChildren<AudioListener>().enabled = true;
                 GetComponentInChildren<FlareLayer>().enabled = true;
 
+
+                photonView.RPC("SetAvatar", RpcTarget.All);
+
                 // Disable scene cameras; we'll use player's first-person camera now
                 foreach (Camera cam in GameManager.Instance.sceneCameras)
                     cam.enabled = false;
@@ -153,6 +156,15 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             // *** \/
             // Make sure our player doesn't collide with the gun it is holding
             DisableActiveGunCollider();
+        }
+
+        [PunRPC]
+        public void SetAvatar()
+        {
+            this.gameObject.GetComponent<Animator>().runtimeAnimatorController = (RuntimeAnimatorController)Resources.Load("Animation/UnityChanLocomotions");
+            Debug.Log(GetComponent<Animator>().avatar.name);
+            this.gameObject.GetComponent<Animator>().avatar = transform.Find("Model").GetComponentInChildren<Animator>().avatar;
+
         }
 
         /// <summary>
