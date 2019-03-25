@@ -1301,6 +1301,8 @@ MonoBehaviour:
     type: 3}
   howFarToTossWeapon: 10
   usingPlayerUIPrefab: 0
+  playerData: {fileID: 5906270027394405360, guid: f87bb2e4516d56040bc605842136f53f,
+    type: 3}
 --- !u!114 &1888
 MonoBehaviour:
   m_ObjectHideFlags: 0

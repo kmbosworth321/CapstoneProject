@@ -670,12 +670,18 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 5906270028552759006}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1388160927}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b4307ca0a703e7408b25efe1a102d55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1388160927 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5906270027394405360, guid: f87bb2e4516d56040bc605842136f53f,
+    type: 3}
+  m_PrefabInstance: {fileID: 5906270028552759006}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1641285244 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2087535013709955139, guid: 95f993387ace9cd47979a5f55b28c48d,
@@ -970,6 +976,16 @@ PrefabInstance:
       propertyPath: existingRoomList
       value: 
       objectReference: {fileID: 153116970}
+    - target: {fileID: 577088903627346121, guid: 3cbb55a0a4e29a940b7bdcf196af468e,
+        type: 3}
+      propertyPath: playerData
+      value: 
+      objectReference: {fileID: 1388160927}
+    - target: {fileID: 577088903627346121, guid: 3cbb55a0a4e29a940b7bdcf196af468e,
+        type: 3}
+      propertyPath: avatarSelectSlider
+      value: 
+      objectReference: {fileID: 125461185}
     - target: {fileID: 577088903627346122, guid: 3cbb55a0a4e29a940b7bdcf196af468e,
         type: 3}
       propertyPath: m_LocalPosition.x

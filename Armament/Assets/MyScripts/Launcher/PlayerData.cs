@@ -28,15 +28,25 @@ public class PlayerData : MonoBehaviour
         Name = name;
     }
 
-    public string GetAvatarChoicee()
+    public string GetAvatarChoice()
     {
         return AvatarChoice;
     }
 
-    public void SetAvatarChoice(string avatarChoice)
+    public void SetAvatarChoice(int avatarChoice)
     {
         Debug.Log("SetAvatarChoice test");
-        AvatarChoice = avatarChoice;
+        
+        if (avatarChoice == 0)
+        {
+            AvatarChoice = "KyleRobot";
+        }
+        else if (avatarChoice == 1)
+        {
+            AvatarChoice = "UnityChan";
+        }
+
+        //AvatarChoice = avatarChoice == 0 ? "KyleRobot" : "UnityChan";
     }
 
 

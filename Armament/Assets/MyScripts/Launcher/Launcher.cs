@@ -27,7 +27,9 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         [SerializeField] private GameObject progressLabel;
         [SerializeField] private InputField roomNameInputField;
         [SerializeField] private ScrollRect existingRoomList;
-        
+        [SerializeField] private GameObject playerData;
+        [SerializeField] private Slider avatarSelectSlider;
+
         /// <summary>
         /// The maximum number of players per room. When a room is full, it can't be joined by new players, and so new room will be created.
         /// </summary>
@@ -90,6 +92,15 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 
 
         #region Public Methods
+
+        public int GetAvatarSliderValueFromSlider()
+        {
+            if(avatarSelectSlider != null)
+            {
+                return (int)avatarSelectSlider.value;
+            }
+            return -1;
+        }
 
         /// <summary>
         /// Lists the existing rooms.
@@ -154,6 +165,8 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 
         public void JoinRandomRoom()
         {
+            playerData.GetComponent<PlayerData>().SetAvatarChoice(GetAvatarSliderValueFromSlider());
+
             if (PhotonNetwork.IsConnected)
             {
                 progressLabel.GetComponent<Text>().text = "Joining Random Room...";
@@ -189,6 +202,9 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         /// <param name="expectedUsers">The expected users.</param>
         public void JoinOrCreateRoom(string[] expectedUsers)
         {
+
+            playerData.GetComponent<PlayerData>().SetAvatarChoice(GetAvatarSliderValueFromSlider());
+
             Debug.Log("Launcher: JoinOrCreateRoom(string[] expectedUsers)");
             progressLabel.GetComponent<Text>().text = "Joining or Creating Room...";
 
