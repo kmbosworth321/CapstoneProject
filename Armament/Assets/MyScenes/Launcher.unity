@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.73024184, g: 0.78898203, b: 0.8498679, a: 1}
+  m_IndirectSpecularColor: {r: 0.73023504, g: 0.7889821, b: 0.8498593, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2375,6 +2375,21 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 122695952264178204, guid: 807867a1541a143db9b051c8d2d67d8a,
+        type: 3}
+      propertyPath: m_Options.m_Options.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 122695952264178204, guid: 807867a1541a143db9b051c8d2d67d8a,
+        type: 3}
+      propertyPath: m_Options.m_Options.Array.data[3].m_Text
+      value: Space_Arena
+      objectReference: {fileID: 0}
+    - target: {fileID: 122695952264178204, guid: 807867a1541a143db9b051c8d2d67d8a,
+        type: 3}
+      propertyPath: m_Value
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 807867a1541a143db9b051c8d2d67d8a, type: 3}
 --- !u!1 &670244655
@@ -2826,7 +2841,7 @@ PrefabInstance:
     - target: {fileID: 577088903627346121, guid: 3cbb55a0a4e29a940b7bdcf196af468e,
         type: 3}
       propertyPath: namesOfArenas.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 577088903627346121, guid: 3cbb55a0a4e29a940b7bdcf196af468e,
         type: 3}
@@ -2876,7 +2891,7 @@ PrefabInstance:
     - target: {fileID: 577088903627346121, guid: 3cbb55a0a4e29a940b7bdcf196af468e,
         type: 3}
       propertyPath: namesOfArenas.Array.data[2]
-      value: 
+      value: Space_Arena
       objectReference: {fileID: 0}
     - target: {fileID: 577088903627346122, guid: 3cbb55a0a4e29a940b7bdcf196af468e,
         type: 3}

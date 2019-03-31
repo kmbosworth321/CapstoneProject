@@ -27,7 +27,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         // Currently, this information is also accessed in the GameManager class to determine the correct transform
         // for the team dividing wall prefab during instantiation in the Start method.
         [Tooltip("The game level (unity scene) to load. See comments in code for more information.")]
-        [SerializeField] public static string developmentOnly_levelToLoad = "Simple Room";
+        [SerializeField] public static string developmentOnly_levelToLoad = "Space_Arena";
 
         [Tooltip("The UI Panel to let the user enter name, connect and play")]
         [SerializeField] private GameObject controlPanel;

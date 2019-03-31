@@ -235,7 +235,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             // Old code (from tutorial): 
             // - PhotonNetwork.LoadLevel("Room for " + PhotonNetwork.CurrentRoom.PlayerCount);
 
-            PhotonNetwork.LoadLevel("Room for 1");
+            PhotonNetwork.LoadLevel("Space_Arena");
         }
 
         void ProcessInputs()
