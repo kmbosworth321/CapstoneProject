@@ -10,6 +10,9 @@ public class GamePlayFabController : MonoBehaviour
     public static GamePlayFabController GPFC;
     public SceneManager SM;
 
+    private int playerKillCountThisGame;
+    private int playerTotalKills;
+
     private void OnEnable()
     {
         if (GamePlayFabController.GPFC == null)
@@ -35,29 +38,13 @@ public class GamePlayFabController : MonoBehaviour
         }
 
         playerKillCountThisGame = 0;
-        //setStats();
-        //getStats();
+        GetStats();
     }
 
     #region PlayerStats
 
-    private int playerKillCountThisGame;
-    private int playerTotalKills;
-
-    public void setStats()
-   {
-        PlayFabClientAPI.UpdatePlayerStatistics(new UpdatePlayerStatisticsRequest
-        {
-            // request.Statistics is a list, so multiple StatisticUpdate objects can be defined if required.
-            Statistics = new List<StatisticUpdate> {
-            new StatisticUpdate { StatisticName = "PlayerKillCount", Value = playerTotalKills + playerKillCountThisGame }
-            }
-        },
-        result => { Debug.Log("User statistics updated"); },
-        error => { Debug.LogError(error.GenerateErrorReport()); });
-    }
-
-    void getStats()
+    //Receive stats from database
+    void GetStats()
     {
         PlayFabClientAPI.GetPlayerStatistics(
             new GetPlayerStatisticsRequest(),
@@ -66,6 +53,7 @@ public class GamePlayFabController : MonoBehaviour
         );
     }
 
+    //Log each stat to the user
     void OnGetStatistics(GetPlayerStatisticsResult result)
     {
         Debug.Log("Received the following Statistics:");
@@ -97,10 +85,10 @@ public class GamePlayFabController : MonoBehaviour
     {
         // Cloud Script returns arbitrary results, so you have to evaluate them one step and one parameter at a time
         Debug.Log(JsonWrapper.SerializeObject(result.FunctionResult));
-        JsonObject jsonResult = (JsonObject)result.FunctionResult;
-        object messageValue;
-        jsonResult.TryGetValue("messageValue", out messageValue); // note how "messageValue" directly corresponds to the JSON values set in Cloud Script
-        Debug.Log((string)messageValue);
+        //JsonObject jsonResult = (JsonObject)result.FunctionResult;
+        //object messageValue;
+        //jsonResult.TryGetValue("messageValue", out messageValue); // note how "messageValue" directly corresponds to the JSON values set in Cloud Script
+        //Debug.Log((string)messageValue);
     }
 
     private static void OnErrorShared(PlayFabError error)
@@ -112,7 +100,9 @@ public class GamePlayFabController : MonoBehaviour
     {
         Debug.Log("Incrementing Kill Count...");
         playerKillCountThisGame++;
+        GetStats();
         StartCloudUpdatePlayerStats();
+
     }
 
     #endregion PlayerStats

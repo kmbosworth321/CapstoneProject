@@ -5,6 +5,7 @@ using System.Collections;
 using Photon.Pun;
 using System;
 using Photon.Realtime;
+using PlayFab;
 using System.Collections.Generic;
 
 namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
@@ -21,7 +22,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         // Key references for the Player CustomProperties hash table (so we don't use messy string literals)
         public const string KEY_KILLS = "Kills";
         public const string KEY_DEATHS = "Deaths";
-        public const string KEY_MODE = "Mode"; 
+        public const string KEY_MODE = "Mode";
         public const string KEY_TEAM = "Team";
         public const string KEY_ACTIVE_GUN = "Active Gun";
 
@@ -88,22 +89,22 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         private const bool DEBUG_ProcessInputs = false;
         private const bool DEBUG_SetAvatar = false;
         private const bool DEBUG_TakeDamage = false;
-        private const bool DEBUG_SetMode = true; 
+        private const bool DEBUG_SetMode = true;
 
         private AudioSource audioSource;
 
         private ArrayList playerWeapons;
         private GameObject gunToBePickedUpGO; // stores a reference to the a gun we want to pick up
         private Vector3 activeGunPosition;
-        
+
         private int activeGunType; // keeps track of currently active gun's type 
         private int previousActiveGunType; // keeps track of previously active gun's type
         private Gun activeGun; // keeps track of active gun the active gun: a gun that is synced on network
         private Gun activeShowGun; // keeps track of the active "show" gun: a gun that is not synced on network (instantiated locally) and used to visually and functionally represent activeGun
         private object[] instantiationData; // information that was linked with this Gun's GO when it was instantiated by the master client
         private bool selectingWeapon; // flag to keep track of whether user is trying to select a weapon
-        private int weaponSelectionIndex; 
-        
+        private int weaponSelectionIndex;
+
         private GameObject playerGO;
         private GameObject unityChanPrefab;
         private GameObject kyleRobotPrefab;
@@ -128,13 +129,14 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 
             if (DEBUG && DEBUG_Awake) Debug.LogFormat("PlayerManager: Awake() actorNumber = {0}, PhotonNetwork.LocalPlayer.ActorNumber = {1}", actorNumber, PhotonNetwork.LocalPlayer.ActorNumber);
 
-            if (PhotonNetwork.LocalPlayer.ActorNumber == actorNumber) {
+            if (PhotonNetwork.LocalPlayer.ActorNumber == actorNumber)
+            {
                 //if (!photonView.IsMine)
                 //{
-                    if (DEBUG && DEBUG_Awake) Debug.LogFormat("PlayerManager: Awake() Transferring ownership to PhotonNetwork.LocalPlayer = {0}", PhotonNetwork.LocalPlayer);
-                    GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
+                if (DEBUG && DEBUG_Awake) Debug.LogFormat("PlayerManager: Awake() Transferring ownership to PhotonNetwork.LocalPlayer = {0}", PhotonNetwork.LocalPlayer);
+                GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
                 //}
-                
+
                 // #Important
                 // used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
                 if (DEBUG && DEBUG_Awake) Debug.LogFormat("PlayerManager: Awake() Setting PlayerManager.LocalPlayerInstance = {0}", gameObject);
@@ -168,7 +170,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                 // Call SetTarget() on PlayerInfoUI component so the PlayerInfoUI will follow be linked to this player 
                 playerInfoUIGO.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
             }
-            
+
             // #Critical
             // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
             DontDestroyOnLoad(this.gameObject);
@@ -182,7 +184,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         [PunRPC]
         public void SetAvatar(string avatarChoice)
         {
-            
+
             /*Debug.LogFormat("PlayerManager: SetAvatar() avatarChoice = {0}, avatarChoice.Equals(\"KyleRobot\") = {1}", avatarChoice, avatarChoice.Equals("KyleRobot "));
             // If user chooses kyle...
             //if (playerData.GetComponent<PlayerData>().GetAvatarChoice().Equals("KyleRobot"))
@@ -225,7 +227,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         {
             if (DEBUG && DEBUG_Start) Debug.LogFormat("PlayerManager: Start() ");
             //Debug.Log("Start(): Avatar choice coming from Launcher scene into PlayerData: " + PlayerData.GetComponent<PlayerData>().GetAvatarChoice());
- 
+
             audioSource = GetComponent<AudioSource>();
             if (!audioSource)
             {
@@ -283,7 +285,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             {
                 ProcessInputs();
             }
-            
+
             // Regenerate Shield
             if (Shield < MAX_SHIELD)
             {
@@ -377,7 +379,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             {
                 transform.position = new Vector3(0f, 5f, 0f);
             }
-            
+
             /** Note from tutorial:
              *   when a new level is loaded, the UI is being 
              *   destroyed yet our player remains... so we need to instantiate it as well when we know a level was loaded
@@ -427,7 +429,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                 if (currentOwner.Equals(photonView.Owner.NickName))
                 {
                     if (DEBUG && DEBUG_OnRoomPropertiesUpdate) Debug.LogFormat("PlayerManager: OnRoomPropertiesUpdate() About to pick up gun: gunViewID = {0}", gunViewID);
-                    
+
                     // If we go to this point, we have collided with an unclaimed gun and we have successfully claimed ownership of the gun
                     // in CurrentRoom.CustomProperties. We now want the player (on all clients) to pick up the gun and make it the active gun.
                     // 
@@ -476,10 +478,10 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             {
                 // Get the value for the key
                 changedProps.TryGetValue(key, out object value);
-                
+
                 // If the player property that changed was KEY_ACTIVE_GUN...
                 if (KEY_ACTIVE_GUN.Equals((string)key))
-                {   
+                {
                     // If the KEY_ACTIVE_GUN value was just removed... 
                     if (value == null)
                     {
@@ -526,7 +528,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         /// <param name="team"></param>
         public void SetTeam(string team)
         {
-            photonView.Owner.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { {KEY_TEAM, team} });
+            photonView.Owner.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { KEY_TEAM, team } });
         }
 
         public string GetTeam()
@@ -589,7 +591,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                     // Player's Shield takes damage equal to amount of damage inflicted
                     Shield -= amount;
                     // Player's health takes damage proportional to the amount of shield they have left
-                    Health -= (1 - Shield/MAX_SHIELD) * amount;
+                    Health -= (1 - Shield / MAX_SHIELD) * amount;
                 }
                 else
                 {
@@ -680,12 +682,12 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                 transform.position = transform.position + new Vector3(0f, 20f, 0f);
                 Update();
                 transform.GetComponent<FirstPersonController>().enabled = true;*/
-                
+
                 // Move player to spawn point
                 MovePlayer(playerSpawnPoint);
             }
         }
-        
+
         public void StartDeadSpectatorMode()
         {
             // Sync player's mode (whether they are alive or dead and spectating)
@@ -819,7 +821,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 
             // Protect against double collisions (trying to pick up the same gun twice)
             // *** This check might not be necessary after recent code changes... TODO: look into it
-            
+
             if (pickedUpGun.Equals(activeGun))//sometimes this is null for some reason.
             {
                 return;
@@ -908,7 +910,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
 
             // If this client owns the player dropping the gun...
             if (photonView.IsMine)
-            {                
+            {
                 // Transfer Gun's PhotonView ownership to the "Scene"
                 gun.GetComponent<PhotonView>().TransferOwnership(0);
             }
@@ -974,7 +976,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             int deaths = (value == null) ? 0 : Convert.ToInt32(value);
 
             // Add a death for this player
-            photonView.Owner.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { {KEY_DEATHS, ++deaths} });
+            photonView.Owner.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { KEY_DEATHS, ++deaths } });
 
             if (DEBUG) Debug.LogFormat("PlayerManager: AddDeath() deaths = {0}, photonView.Owner.NickName = {1}", deaths, photonView.Owner.NickName);
         }
@@ -985,17 +987,18 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         /// </summary>
         void AddKill()
         {
-            //Add Kill to player's db stats
-            //var addKillScript = GameObject.Find("GamePlayFabController").GetComponent<GamePlayFabController>();
-            //addKillScript.IncrementKillCount();
-
             // Get current deaths for this player
             photonView.Owner.CustomProperties.TryGetValue(KEY_KILLS, out object value);
             int kills = (value == null) ? 0 : Convert.ToInt32(value);
 
+
+            //TODO: This is the test method for Stat sync. It turns out that this AddKill() method never actually gets called. If the method
+            //is called this line below will increment the player's kill count stat.
+            GameManager.Instance.GetComponent<GamePlayFabController>().IncrementKillCount();
+
             // Add a kill for this player
             photonView.Owner.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { KEY_KILLS, ++kills } });
-            
+
             if (DEBUG) Debug.LogFormat("PlayerManager: AddKill() kills = {0}, photonView.Owner.NickName = {1}", kills, photonView.Owner.NickName);
         }
 
@@ -1024,7 +1027,8 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             }
 
             // If user is not currently selecting a weapon
-            if (!selectingWeapon) { 
+            if (!selectingWeapon)
+            {
                 if (Input.GetButtonDown("Fire1"))
                 {
                     // we don't want to fire when we interact with UI buttons for example. IsPointerOverGameObject really means IsPointerOver*UI*GameObject
@@ -1061,7 +1065,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             else
             {
                 GameObject weaponInventoryMenuGO = GameManager.Instance.canvas.transform.Find("Weapon Inventory Menu").gameObject;
-                
+
                 // If user wants to highlight previous weapon
                 if (Input.mouseScrollDelta.y > 0)
                 {
@@ -1097,7 +1101,8 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             // If has pressed and released the G key...
             if (Input.GetKeyUp(KeyCode.G))
             {
-                if (activeGun == null) {
+                if (activeGun == null)
+                {
                     if (DEBUG && DEBUG_ProcessInputs) Debug.Log("PlayerManager: ProcessInputs() Trying to drop active gun but this.activeGun == null");
                     return;
                 }
@@ -1119,24 +1124,14 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                 {
                     GameObject fragGrenade = PhotonNetwork.Instantiate("FragGrenade", gameObject.transform.position, gameObject.transform.rotation);
                     fragGrenade.GetComponent<FragGrenade>().playerWhoOwnsThisGrenade = this;//setting this for TakeDamage(int/float,playerwhoowns...)
-                                     
+
                     //yield return new WaitForSeconds(2.0f);
                     //PhotonNetwork.Destroy(skycar);
                     //StartCoroutine("DestroyCar", skyCar);
                 }
-                
-            }
-
-            if (Input.GetKeyUp(KeyCode.K))
-            {
-                if (photonView.IsMine)//network ismasterclient
-                {
-                    //Add Kill to player's db stats
-                    var addKillScript = GameObject.Find("GamePlayFabController").GetComponent<GamePlayFabController>();
-                    addKillScript.IncrementKillCount();
-                }
 
             }
+
 
             if (Input.GetKeyUp(KeyCode.Alpha1))
             {
@@ -1182,7 +1177,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         void SwapActiveGun(int gunType)
         {
             if (DEBUG && DEBUG_SwapGun) Debug.LogFormat("PlayerManager: SwapGun gunType = {0}", gunType);
-            
+
             // Find a gun in player inventory matching the gun type and set it as our active gun
             Transform inactiveWeapons = transform.Find("FirstPersonCharacter/Inactive Weapons");
             for (int i = 0; i < inactiveWeapons.childCount; i++)
@@ -1212,7 +1207,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             // Make player on this client drop the gun
             DropGun(activeGun);
         }
-        
+
         /// <summary>
         /// Shoot was invoked over photon network via RPC
         /// </summary>
@@ -1224,14 +1219,14 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             if (activeGun == null)
             {
                 if (DEBUG) Debug.LogFormat("PlayerManager: [PunRPC] Shoot() Trying to shoot gun but activeGun = null");
-                return; 
+                return;
             }
 
             /*
             // Tell the gun to shoot
             activeGun.Shoot();
             */
-            
+
             // Tell the "show" gun to shoot
             activeShowGun.Shoot();
         }
@@ -1356,12 +1351,12 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         public void OnPhotonInstantiate(PhotonMessageInfo info)
         {
             if (DEBUG && DEBUG_OnPhotonInstantiate) Debug.LogFormat("PlayerManager: OnPhotonInstantiate() info.Sender = {0}, gameObject = {1}", info.Sender, gameObject);
-            
+
             instantiationData = GetComponent<PhotonView>().InstantiationData;
             int actorNumber = (int)instantiationData[0];
             Player thisPlayer = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
 
-            if (DEBUG && DEBUG_OnPhotonInstantiate)  Debug.LogFormat("PlayerManager: OnPhotonInstantiate() actorNumber = {0}, thisPlayer = {1}", actorNumber, thisPlayer);
+            if (DEBUG && DEBUG_OnPhotonInstantiate) Debug.LogFormat("PlayerManager: OnPhotonInstantiate() actorNumber = {0}, thisPlayer = {1}", actorNumber, thisPlayer);
 
             if (thisPlayer != null)
             {
@@ -1381,9 +1376,9 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                     catch (Exception) { continue; }
 
                     if (DEBUG && DEBUG_OnPhotonInstantiate) Debug.LogFormat("PlayerManager: OnPhotonInstantiate() gunViewID = {0} ", gunViewID);
-                                        
+
                     Gun gun = PhotonView.Find(gunViewID).GetComponent<Gun>();
-                    
+
                     // If this gun has a registered owner (player) in the room's CustomProperties...
                     if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(gunViewID.ToString(), out object gunOwnerNickName))
                     {

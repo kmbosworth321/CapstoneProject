@@ -268,6 +268,12 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                 Transform playerInfoPanel = canvas.transform.Find("Player Info Panel");
                 playerInfoPanel.gameObject.SetActive(false);
             }
+
+            //TODO: Method to show functionality of stats  until AddKill() is called  successfully
+            if (Input.GetKeyUp(KeyCode.K))
+            {
+                GetComponent<GamePlayFabController>().IncrementKillCount();
+            }
 #endif
         }
 
@@ -571,13 +577,13 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         [PunRPC]
         void PlayNewRoundSound()
         {
-           /* GameObject announcer = new GameObject("Announcer");
-            AudioSource audioSource = announcer.AddComponent<AudioSource>();
-            Debug.LogFormat("PlayerManager: Die() audioSource = {0}, newRoundSound = {1}", audioSource, newRoundSound);
+            /* GameObject announcer = new GameObject("Announcer");
+             AudioSource audioSource = announcer.AddComponent<AudioSource>();
+             Debug.LogFormat("PlayerManager: Die() audioSource = {0}, newRoundSound = {1}", audioSource, newRoundSound);
 
-            // Play death sound
-            audioSource.PlayOneShot(newRoundSound); // I read somewhere online that this allows the sounds to overlap
-            Destroy(announcer, 5f);*/
+             // Play death sound
+             audioSource.PlayOneShot(newRoundSound); // I read somewhere online that this allows the sounds to overlap
+             Destroy(announcer, 5f);*/
         }
 
         /// <summary>
@@ -824,7 +830,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                 if (DEBUG && DEBUG_OnPlayerDeath) Debug.Log("GameManager: OnPlayerDeath() NOT MASTER CLIENT: Doing nothing...");
                 return;
             }
-            
+
             if (!roundEndsWhenLastOpponentDies)
             {
                 if (DEBUG && DEBUG_OnPlayerDeath) Debug.Log("GameManager: OnPlayerDeath() CLIENT IS MasterClient: " +
@@ -862,7 +868,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             {
                 if (DEBUG && DEBUG_OnPlayerDeath) Debug.Log("GameManager: OnPlayerDeath() CLIENT IS MasterClient: " +
                     "morePlayersOnTeamStillAlive = false, so Ending this round...");
-                
+
                 // End this round (which will start a new round)
                 EndRound();
             }
