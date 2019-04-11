@@ -1078,7 +1078,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
                     if (activeGun != null && activeGun.IsReadyToShoot())
                     {
                         // Call the [PunRPC] Shoot method over photon network
-                        photonView.RPC("Shoot", RpcTarget.All);
+                        photonView.RPC("Shoot", RpcTarget.All);//or throw, or use, etc, and Throw() has to activate the explosion in FragGrenade.cs
                     }
                 }
             }

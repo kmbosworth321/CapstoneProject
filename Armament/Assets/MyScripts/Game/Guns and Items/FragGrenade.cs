@@ -19,6 +19,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame {
         public float baseDamage = 100f;
         private float distanceFromGrenade;
         private float damageCaused;
+        public bool thrown;
         public bool hasExploded;
         [SerializeField] GameObject explosionParticle;
         [Tooltip("The player who is holding the grenade. **This implementation might need revision**")]
@@ -27,6 +28,7 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame {
 
         void Start()
         {
+            thrown = false;
             hasExploded = false;
             countdown = timer;
             
@@ -36,17 +38,21 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame {
 
         void Awake()
         {
-            Throw();//throw the throwable grenade
+            //Throw();//throw the throwable grenade
         }
 
         // Update is called once per frame
         void Update()
         {
-            countdown -= Time.deltaTime;
-            if (countdown <= 0 && !hasExploded)
+            if(thrown == true)//after the grenade has been thrown
             {
-                Explode();
+                countdown -= Time.deltaTime;
+                if (countdown <= 0 && !hasExploded)
+                {
+                    Explode();
+                }
             }
+            
         }
 
         void Explode()
@@ -99,11 +105,15 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame {
             //Destroy(spawnedParticle.gameObject);//despawns too early--handled in the explosion itself
         }
 
+        //this needs to be a fully networked RPC function now
         public void Throw()//called from playermanager. pulling into here makes it more modular in PlayerManager since theres a lot of cod ethere. Similar to shoot. 
         {
+            thrown = true;
+            //rudimentary lob, needs to be revised and implemented with an animation
             //add up and forward forces to lob it
             this.gameObject.GetComponent<Rigidbody>().AddForce(transform.forward * 1500.0f);
             this.gameObject.GetComponent<Rigidbody>().AddForce(0, 400, 0);
+            //throw it, wait, and then Call explode
         }
 
         public bool IsReadyToThrow()
