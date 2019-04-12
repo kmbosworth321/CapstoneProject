@@ -11,7 +11,11 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
         // Key references for the Room CustomProperties hash table (so we don't use messy string literals)
         public const string KEY_WALL_HEALTH = "Wall Health";
 
+        [Tooltip("How many shield points to regenerate per second")]
+        public float HealthRegenerationRate = 10f;
+
         [SerializeField] private float health = 100f;
+
         MeshRenderer meshRenderer;
         private float originalHealth; // keeps track of original health value
 
@@ -23,6 +27,20 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             originalHealth = health;
             meshRenderer = GetComponent<MeshRenderer>();
             SyncWallHealth();
+        }
+
+        void Update()
+        {
+            // If health can be regenerated...
+            if (health < originalHealth && health > 0)
+            {
+                // Regenerate Health
+                // *** Important note: We won't explicitly sync health every time it is regenerated because that
+                // *** would overload the network. We'll rely on each client to be able to regenerate the health
+                // *** of the wall for themselves. Me thinks this will work just fine!
+                health += Math.Min(HealthRegenerationRate * originalHealth/100 * Time.deltaTime, originalHealth);
+                UpdateWallColor();
+            }
         }
 
         #endregion MonoBehaviour CallBacks
