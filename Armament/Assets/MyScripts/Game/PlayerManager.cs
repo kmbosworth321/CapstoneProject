@@ -1261,6 +1261,17 @@ namespace Com.Kabaj.TestPhotonMultiplayerFPSGame
             activeShowGun.Shoot();
         }
 
+        [PunRPC]
+        void Throw(PhotonMessageInfo info)
+        {
+            if (activeGun == null)
+            {
+                if (DEBUG) Debug.LogFormat("PlayerManager: [PunRPC] Throw() Trying to throw a grenade but activeGun = null");
+                return;
+            }
+            //activeShowGun.Throw();//"activegun" for now
+        }
+
         /// <summary>
         /// Handles what happens to this player when it dies.
         /// Right now, we register that this player has died and "respawn" the player
