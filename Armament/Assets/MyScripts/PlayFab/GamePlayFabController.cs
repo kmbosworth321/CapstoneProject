@@ -10,6 +10,8 @@ public class GamePlayFabController : MonoBehaviour
     public static GamePlayFabController GPFC;
     public SceneManager SM;
 
+    public string username;
+
     private void OnEnable()
     {
         if (GamePlayFabController.GPFC == null)
@@ -34,9 +36,23 @@ public class GamePlayFabController : MonoBehaviour
             PlayFabSettings.TitleId = "E5D9";
         }
 
+        //Get the user's username from the account info and set the resultant string's username property to be this user's username
+        GetAccountInfoRequest request = new GetAccountInfoRequest();
+        PlayFabClientAPI.GetAccountInfo(request, OnGetAccountInfoSuccess, OnPlayFabCallbackError);
+
         playerKillCountThisGame = 0;
         //setStats();
         //getStats();
+    }
+
+    //resultant method used to set the player's username
+    public void OnGetAccountInfoSuccess(GetAccountInfoResult result) {
+        username = result.AccountInfo.Username;
+    }
+
+    //error if request for account info fails
+    public void OnPlayFabCallbackError(PlayFabError error) {
+        Debug.Log(error);
     }
 
     #region PlayerStats
